@@ -1,0 +1,10 @@
+node_modules/
+tests/out/
+*.zip
+*.crx
+*.pem
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.env

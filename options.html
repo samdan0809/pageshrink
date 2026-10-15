@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PageShrink 设置</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --line: #e6e8ec; --text: #1c1e22;
+    --muted: #6b7280; --accent: #2f6bff; --danger: #d93b3b; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { padding: 28px 24px 20px; border-bottom: 1px solid var(--line); background: var(--card); }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  .sub { margin: 0; color: var(--muted); font-size: 13px; }
+  main { padding: 24px; }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px 20px; margin-bottom: 18px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; }
+  .card .desc { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+  .row { margin: 14px 0 0; }
+  .row:first-of-type { margin-top: 0; }
+  label.name { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 6px; }
+  label.name b { font-weight: 600; }
+  label.name span.val { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  select, input[type=text] {
+    width: 100%; padding: 7px 10px; font-size: 13px;
+    border: 1px solid var(--line); border-radius: 9px; background: #fff; color: inherit;
+  }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .seg { display: flex; gap: 6px; background: #f1f2f4; padding: 4px; border-radius: 11px; }
+  .seg button { flex: 1; all: unset; text-align: center; padding: 7px 6px; font-size: 13px; border-radius: 8px; cursor: pointer; color: var(--muted); }
+  .seg button[aria-pressed="true"] { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.10); font-weight: 600; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .swatch { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+  .swatch[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
+  input[type=color] { width: 42px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; }
+  .hint-note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+  .btn { all: unset; cursor: pointer; padding: 8px 14px; font-size: 13px; border-radius: 9px; background: var(--accent); color: #fff; font-weight: 600; }
+  .btn.ghost { background: #fff; color: var(--text); border: 1px solid var(--line); font-weight: 500; }
+  .btn.danger { background: #fff; color: var(--danger); border: 1px solid #f0d3d3; font-weight: 500; }
+  .btn:hover { filter: brightness(1.06); }
+  .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .filemeta { font-size: 12px; color: var(--muted); margin-top: 8px; word-break: break-all; }
+  .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; }
+  .toggle + .toggle { border-top: 1px dashed var(--line); }
+  .toggle .t-txt b { display: block; font-weight: 600; font-size: 13px; }
+  .toggle .t-txt span { color: var(--muted); font-size: 12px; }
+  .switch { position: relative; width: 40px; height: 22px; flex: none; }
+  /* 滑轨 i 是绝对定位且排在 input 之后，会盖住透明的 checkbox 把点击全吃掉。
+     必须给 input 提层、给 i 关掉 pointer-events。 */
+  .switch input { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .switch i { position: absolute; inset: 0; pointer-events: none; border-radius: 999px; background: #d6d9de; transition: background .16s; }
+  .switch i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .16s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch input:checked + i { background: var(--accent); }
+  .switch input:checked + i::after { transform: translateX(18px); }
+  ol.steps { margin: 0; padding-left: 20px; color: var(--muted); font-size: 13px; }
+  ol.steps li { margin: 6px 0; }
+  ol.steps b { color: var(--text); }
+  code { background: #f1f2f4; border-radius: 5px; padding: 1px 5px; font-size: 12.5px; }
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); background: #1c1e22; color: #fff; padding: 9px 18px; border-radius: 999px; font-size: 13px; opacity: 0; pointer-events: none; transition: all .22s ease; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  footer { padding: 0 24px 36px; color: var(--muted); font-size: 12px; }
+  #warn { display: none; margin-top: 10px; padding: 9px 12px; border-radius: 9px; background: #fff7e6; border: 1px solid #f0dfb2; color: #8a6100; font-size: 12.5px; }
+  #warn.show { display: block; }
+
+  /* 预览：模拟一张无边框小窗卡片 */
+  .stage { position: relative; height: 210px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #dfe2e7; margin-top: 12px; }
+  .stage .desk { position: absolute; inset: 0; background: linear-gradient(160deg,#cfd6df,#e7eaee); }
+  .win {
+    position: absolute; width: 168px; height: 112px; border-radius: 7px; overflow: hidden;
+    box-shadow: 0 10px 26px rgba(0,0,0,.26); background: #fff; transition: width .12s, height .12s;
+  }
+  .win .page { position: absolute; inset: 0; background: #10141a; }
+  .win .page::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 16px; background: #1b2531; }
+  .win .page i { position: absolute; left: 8px; right: 8px; height: 5px; border-radius: 3px; background: #2b3a4c; display: block; }
+  .win .maskl { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .16s ease; }
+  .win .maskl span { font-size: 9.5px; color: #6b7280; background: rgba(255,255,255,.75); border: 1px solid rgba(0,0,0,.07); padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .win .barl { position: absolute; top: 5px; right: 5px; display: flex; gap: 3px; transition: opacity .14s; }
+  .win .barl b { font-size: 8px; color: #fff; background: rgba(47,107,255,.9); border-radius: 999px; padding: 2px 6px; font-weight: 500; }
+  .win .barl u { width: 12px; height: 12px; border-radius: 50%; background: rgba(26,28,32,.86); color: #dfe3e8; font-size: 8px; text-align: center; line-height: 12px; text-decoration: none; }
+  .stage .tag { position: absolute; left: 10px; bottom: 10px; font-size: 11px; color: #55606d; background: rgba(255,255,255,.85); padding: 3px 8px; border-radius: 999px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>PageShrink 页面小窗 · 设置</h1>
+    <p class="sub">点图标把当前页面收进一个无边框小窗；改动即时生效，不需要重新加载扩展。</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <div class="col">
+      <section class="card">
+        <h2>缩小方式</h2>
+        <p class="desc">Chrome 禁止把标签页搬进无边框窗口，所以纯净小窗只能重新加载页面。</p>
+        <div class="seg" id="seg-mode">
+          <button data-v="popup" aria-pressed="true">纯净小窗</button>
+          <button data-v="resize">保留页面状态</button>
+        </div>
+        <p class="hint-note" id="mode-note"></p>
+      </section>
+
+      <section class="card">
+        <h2>小窗尺寸</h2>
+        <p class="desc">这是浏览器窗口的真实尺寸，页面按正常字号在这个小窗里重新排版。</p>
+        <div class="row two">
+          <div>
+            <label class="name"><b>宽度</b><span class="val" id="width-val">420 px</span></label>
+            <input type="range" id="width" min="280" max="1600" step="10" value="420">
+          </div>
+          <div>
+            <label class="name"><b>高度</b><span class="val" id="height-val">640 px</span></label>
+            <input type="range" id="height" min="200" max="1200" step="10" value="640">
+          </div>
+        </div>
+        <div class="row">
+          <label class="name"><b>停靠位置</b></label>
+          <select id="corner">
+            <option value="br">屏幕右下角</option>
+            <option value="bl">屏幕左下角</option>
+            <option value="tr">屏幕右上角</option>
+            <option value="tl">屏幕左上角</option>
+            <option value="center">屏幕正中</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="name"><b>距屏幕边缘</b><span class="val" id="gap-val">24 px</span></label>
+          <input type="range" id="gap" min="0" max="160" step="4" value="24">
+          <p class="hint-note">多显示器时会停在「当前窗口所在那块屏」的工作区，不会甩到副屏外。<br>
+          注意：「保留页面状态」模式下 Chrome 对带标签栏的窗口有约 <b>500px 最小宽度</b>硬限制，420 会被自动放大到 500；「纯净小窗」没有这个限制，竖版 420×640 正好。</p>
+        </div>
+        <div class="row">
+          <div class="toggle">
+            <div class="t-txt"><b>原窗口只剩一个标签时最小化它</b><span>否则桌面上会留一个空的大窗口；还原时自动恢复</span></div>
+            <span class="switch"><input type="checkbox" id="hideSource" checked><i></i></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>预览</h2>
+        <p class="desc">鼠标移入下方小窗，试一下遮罩淡出的手感。</p>
+        <div class="stage" id="stage">
+          <div class="desk"></div>
+          <div class="win" id="win">
+            <div class="page"><i style="top:24px"></i><i style="top:36px"></i><i style="top:48px"></i><i style="top:60px"></i></div>
+            <div class="maskl" id="pv-mask"><span id="pv-hint">移回鼠标继续浏览</span></div>
+            <div class="barl"><b>还原</b><u>⚙</u></div>
+          </div>
+          <span class="tag" id="pv-tag">420 × 640 · 右下角</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <h2>遮罩样式</h2>
+        <p class="desc">鼠标离开小窗时盖住网页的那张图。</p>
+        <div class="seg" id="seg-style">
+          <button data-v="color" aria-pressed="true">纯色</button>
+          <button data-v="image">自定义图片</button>
+        </div>
+
+        <div class="row" id="box-color">
+          <label class="name"><b>底色</b><span class="val" id="color-val">#ffffff</span></label>
+          <div class="swatches">
+            <button class="swatch" data-c="#ffffff" title="纯白" style="background:#ffffff"></button>
+            <button class="swatch" data-c="#f6f7f9" title="浅灰" style="background:#f6f7f9"></button>
+            <button class="swatch" data-c="#1c1e22" title="深色" style="background:#1c1e22"></button>
+            <button class="swatch" data-c="#0b1f3a" title="深蓝" style="background:#0b1f3a"></button>
+            <button class="swatch" data-c="#eef1ee" title="浅绿灰" style="background:#eef1ee"></button>
+            <input type="color" id="color" value="#ffffff" aria-label="自定义颜色">
+          </div>
+        </div>
+
+        <div class="row" id="box-image" hidden>
+          <div class="actions">
+            <button class="btn" id="pick">选择图片…</button>
+            <button class="btn danger" id="clear-img">移除图片</button>
+            <input type="file" id="file" accept="image/*" hidden>
+          </div>
+          <div class="filemeta" id="img-meta">还没有上传图片，当前会回退到纯色遮罩。</div>
+          <div id="warn"></div>
+          <label class="name" style="margin-top:14px"><b>填充方式</b></label>
+          <select id="fill">
+            <option value="cover">cover · 铺满并裁切</option>
+            <option value="contain">contain · 完整显示</option>
+            <option value="stretch">stretch · 拉伸变形</option>
+            <option value="repeat">repeat · 平铺</option>
+            <option value="center">center · 原始尺寸居中</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="name"><b>不透明度</b><span class="val" id="opacity-val">100%</span></label>
+          <input type="range" id="opacity" min="10" max="100" step="1" value="100">
+        </div>
+        <div class="row">
+          <label class="name"><b>背景毛玻璃</b><span class="val" id="blur-val">0 px</span></label>
+          <input type="range" id="blur" min="0" max="30" step="1" value="0">
+          <p class="hint-note">把不透明度调低后再加毛玻璃，能透出一点页面轮廓；纯不透明时看不出效果。</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>触发手感</h2>
+        <div class="row">
+          <label class="name"><b>鼠标离开后延迟盖上</b><span class="val" id="delay-val">60 ms</span></label>
+          <input type="range" id="delay" min="0" max="1500" step="10" value="60">
+          <p class="hint-note">0 = 立刻盖上。这个延时由 CSS 过渡实现，不受 Chrome 后台定时器节流影响。窗口失焦或被其他窗口挡住时会跳过延时立即盖上。</p>
+        </div>
+        <div class="row">
+          <label class="name"><b>淡入淡出</b><span class="val" id="fade-val">80 ms</span></label>
+          <input type="range" id="fade" min="0" max="800" step="10" value="80">
+        </div>
+        <div class="row">
+          <label class="name"><b>提示文字</b></label>
+          <input type="text" id="hint" maxlength="40" placeholder="留空则不显示">
+        </div>
+        <div class="toggle">
+          <div class="t-txt"><b>显示提示文字</b><span>在遮罩中央提醒“移回鼠标”</span></div>
+          <span class="switch"><input type="checkbox" id="showHint" checked><i></i></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>窗口标题</h2>
+        <p class="desc">小窗期间替换浏览器标题栏（和标签页）上的名字，还原后自动改回去。</p>
+        <div class="row">
+          <label class="name"><b>标题</b><span class="val" id="title-len">0 / 80</span></label>
+          <input type="text" id="title" maxlength="80" placeholder="留空 = 保持网页原标题">
+          <p class="hint-note">可用占位符：<code>{title}</code> 原网页标题、<code>{host}</code> 域名。
+          例如填 <code>{host} · 文档</code> 会显示成 <code>example.com · 文档</code>。</p>
+          <p class="hint-note">网页自己改标题（SPA 路由、未读数、倒计时）时会自动重新套上你的标题。</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <h2>怎么用</h2>
+        <ol class="steps">
+          <li>在普通浏览器窗口里点工具栏的 <b>PageShrink 图标</b>。</li>
+          <li>页面会变成一个<b>独立的小窗口</b>停在屏幕角落，可以拖动、可以拉边缘改大小。</li>
+          <li><b>鼠标移出</b>这个小窗 → 网页被遮罩盖住；<b>移回来</b> → 立刻恢复，正常滚动点击。</li>
+          <li>小窗右上角的 <b>还原</b> 按钮把页面放回原来的窗口，并关掉小窗。</li>
+          <li>也可以在原来的大窗口里再点一次图标来还原。</li>
+          <li>多个窗口各点一次，会各自生成独立小窗，最多 8 个。</li>
+        </ol>
+        <p class="hint-note"><b>纯净小窗</b>：没有标签栏和地址栏，但页面会重新加载一次（已尽量把滚动位置带过去，未提交的表单、SPA 内部状态会丢）。
+        <b>保留页面状态</b>：不重新加载、状态完整，但标签栏和地址栏还在。这是 Chrome 的限制，扩展无法把标签页搬进无边框窗口。</p>
+        <p class="hint-note">若用于本地 <code>file://</code> 页面，请在扩展详情页开启「允许访问文件网址」；<code>chrome://</code> 等浏览器自身页面无法注入脚本。</p>
+      </section>
+
+      <section class="card">
+        <h2>安装</h2>
+        <ol class="steps">
+          <li>地址栏打开 <code>chrome://extensions</code>，右上角开启<b>开发者模式</b>。</li>
+          <li>点<b>加载已解压的扩展程序</b>，选择 <code>pageshrink</code> 文件夹。</li>
+          <li>建议把图标固定到工具栏，之后一键切换。</li>
+        </ol>
+        <div class="actions" style="margin-top:14px">
+          <button class="btn ghost" id="reset">恢复全部默认设置</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">已保存</div>
+<footer class="wrap">PageShrink v2.1.1 · 所有设置与图片都只保存在这台电脑的扩展本地存储里。</footer>
+
+<script src="options.js"></script>
+</body>
+</html>

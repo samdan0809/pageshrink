@@ -1,0 +1,18 @@
+{
+  "name": "pageshrink",
+  "version": "2.1.1",
+  "private": true,
+  "description": "PageShrink 的开发期工具链。扩展本体是纯手写 JS，没有构建步骤。",
+  "scripts": {
+    "pack": "node scripts/pack.js",
+    "shots": "node scripts/screenshots.js",
+    "test": "node tests/v2test.js && node tests/titletest.js && node tests/optui.js && node tests/defaultsize.js",
+    "test:v2": "node tests/v2test.js",
+    "test:title": "node tests/titletest.js",
+    "test:ui": "node tests/optui.js",
+    "test:size": "node tests/defaultsize.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^13.7.0"
+  }
+}
